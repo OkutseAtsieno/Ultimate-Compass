@@ -1,0 +1,625 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Projects | Ultimate Compass{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ==============================
+       PAGE HEADING
+    ============================== */
+    .projects-heading {
+        text-align: center;
+        max-width: 750px;
+        margin: 60px auto 20px;
+        padding: 0 25px;
+    }
+
+    .projects-heading h1 {
+        font-size: 2.6rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 15px;
+    }
+
+    .projects-heading p {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+
+    /* ==============================
+       PROJECT LIST
+    ============================== */
+    .projects-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 50px 25px 10px;
+        scroll-margin-top: 70px;
+    }
+
+    .section-head {
+        margin-bottom: 25px;
+    }
+
+    .section-head h2 {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 6px;
+    }
+
+    .section-head p {
+        color: #6c757d;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .section-head h2::after {
+        content: "";
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: #FFD700;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+
+    .projects-list {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .jump-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .jump-nav a {
+        padding: 8px 18px;
+        border-radius: 30px;
+        background: #f3f4f6;
+        color: #0b1f3a;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: 0.3s ease;
+    }
+
+    .jump-nav a:hover {
+        background: #FFD700;
+    }
+
+    .section-end {
+        height: 50px;
+    }
+
+    .project-card {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 35px;
+        background: white;
+        border-radius: 20px;
+        border-top: 5px solid #FFD700;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        padding: 30px;
+    }
+
+    /* ==============================
+       MEDIA (video / image)
+    ============================== */
+    .project-media {
+        min-width: 0;
+    }
+
+    .media-frame {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #0b1f3a;
+    }
+
+    .media-frame video,
+    .media-frame iframe,
+    .media-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: 0;
+        display: block;
+    }
+
+    .media-frame.placeholder img {
+        opacity: 0.45;
+    }
+
+    .media-badge {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .media-badge strong {
+        font-size: 1.15rem;
+    }
+
+    .media-badge span {
+        font-size: 0.9rem;
+        color: #e0e0e0;
+    }
+
+    .shot {
+        display: block;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .shot img {
+        width: 100%;
+        display: block;
+    }
+
+    .shot-hint {
+        font-size: 0.78rem;
+        color: #6c757d;
+        margin-top: 6px;
+    }
+
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .gallery img {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        display: block;
+    }
+
+    /* ==============================
+       TEXT SIDE
+    ============================== */
+    .project-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .project-status {
+        align-self: flex-start;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: #fff6bf;
+        color: #7a6600;
+        margin-bottom: 10px;
+    }
+
+    .project-body h3 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 4px;
+    }
+
+    .project-tagline {
+        color: #9a8300;
+        font-weight: 600;
+        margin-bottom: 14px;
+    }
+
+    .project-body p {
+        color: #444;
+        line-height: 1.7;
+        margin-bottom: 16px;
+    }
+
+    .project-body ul.highlights {
+        padding-left: 1.2rem;
+        color: #444;
+        line-height: 1.7;
+        margin-bottom: 16px;
+    }
+
+    .project-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .metric {
+        background: #0b1f3a;
+        color: white;
+        border-radius: 12px;
+        padding: 8px 16px;
+        line-height: 1.2;
+    }
+
+    .metric strong {
+        display: block;
+        font-size: 1.35rem;
+        color: #FFD700;
+    }
+
+    .metric span {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #d6d6d6;
+    }
+
+    .project-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .project-tag {
+        background: #f3f4f6;
+        color: #0b1f3a;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+
+    .project-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: auto;
+    }
+
+    .project-links a {
+        color: #0b1f3a;
+        font-weight: 700;
+        text-decoration: none;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .project-links a:hover {
+        color: #9a8300;
+    }
+
+    /* ==============================
+       PIPELINE (build progress)
+    ============================== */
+    .pipeline-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #0b1f3a;
+        margin: 4px 0 10px;
+    }
+
+    .pipeline {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 18px;
+    }
+
+    .pipeline li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 6px 0;
+        color: #333;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .pipeline .dot {
+        flex: 0 0 auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 0.7rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+    }
+
+    .pipeline .done .dot     { background: #0b1f3a; color: #FFD700; }
+    .pipeline .progress .dot { background: #FFD700; color: #0b1f3a; }
+    .pipeline .planned .dot  { background: #e5e7eb; color: #6c757d; }
+    .pipeline .planned       { color: #6c757d; }
+
+    .state-label {
+        margin-left: auto;
+        flex: 0 0 auto;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #6c757d;
+    }
+
+    /* ==============================
+       EMPTY STATE
+    ============================== */
+    .empty-state {
+        max-width: 700px;
+        margin: 0 auto;
+        text-align: center;
+        background: white;
+        border-radius: 20px;
+        border-top: 5px solid #FFD700;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        padding: 35px 30px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #555;
+        line-height: 1.7;
+        margin-bottom: 22px;
+    }
+
+    /* ==============================
+       CLOSING CTA
+    ============================== */
+    .projects-cta {
+        background: #0b1f3a;
+        color: white;
+        text-align: center;
+        padding: 60px 25px;
+    }
+
+    .projects-cta h2 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .projects-cta p {
+        color: #d6d6d6;
+        margin-bottom: 25px;
+        font-size: 1.05rem;
+    }
+
+    .cta-btn {
+        display: inline-block;
+        padding: 13px 30px;
+        background: #FFD700;
+        color: #0b1f3a;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .cta-btn:hover {
+        background: white;
+        color: #0b1f3a;
+        transform: translateY(-3px);
+    }
+
+    .cta-btn.dark {
+        background: #0b1f3a;
+        color: white;
+    }
+
+    .cta-btn.dark:hover {
+        background: #FFD700;
+        color: #0b1f3a;
+    }
+
+    /* ==============================
+       MOBILE
+    ============================== */
+    @media (max-width: 900px) {
+        .project-card {
+            grid-template-columns: 1fr;
+            padding: 22px;
+        }
+
+        .projects-heading h1 {
+            font-size: 2.1rem;
+        }
+    }
+</style>
+
+
+<!-- ==============================
+     HEADING
+============================== -->
+<div class="projects-heading">
+    <h1>Projects</h1>
+    <p>{{ page_intro }}</p>
+
+    <nav class="jump-nav" aria-label="Project categories">
+        {% for sec in sections %}
+            <a href="#{{ sec.anchor }}">{{ sec.title }}</a>
+        {% endfor %}
+    </nav>
+</div>
+
+
+<!-- ==============================
+     PROJECTS
+============================== -->
+{% for sec in sections %}
+<section class="projects-section" id="{{ sec.anchor }}">
+
+    <div class="section-head">
+        <h2>{{ sec.title }}</h2>
+        <p>{{ sec.intro }}</p>
+    </div>
+
+    <div class="projects-list">
+
+    {% for p in sec.projects %}
+    <article class="project-card">
+
+        <!-- MEDIA -->
+        <div class="project-media">
+
+            {% if p.youtube_id %}
+                <div class="media-frame">
+                    <iframe src="https://www.youtube.com/embed/{{ p.youtube_id }}"
+                            title="{{ p.title }} demo"
+                            loading="lazy"
+                            allowfullscreen></iframe>
+                </div>
+
+            {% elif p.video_available %}
+                <div class="media-frame">
+                    <video controls preload="metadata" playsinline
+                           {% if p.poster %}poster="{% static p.poster %}"{% endif %}>
+                        <source src="{% static p.video %}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+            {% elif p.video %}
+                <div class="media-frame placeholder">
+                    {% if p.poster %}<img src="{% static p.poster %}" alt="{{ p.title }}">{% endif %}
+                    <div class="media-badge">
+                        <strong>Demo video coming soon</strong>
+                        <span>The walkthrough will appear here</span>
+                    </div>
+                </div>
+
+            {% elif p.poster %}
+                <div class="media-frame">
+                    <img src="{% static p.poster %}" alt="{{ p.title }}">
+                </div>
+            {% endif %}
+
+            {% if p.screenshot %}
+                <a class="shot" href="{% static p.screenshot %}" target="_blank" rel="noopener">
+                    <img src="{% static p.screenshot %}" alt="{{ p.title }} screenshot" loading="lazy">
+                </a>
+                <div class="shot-hint">Click to view full size</div>
+            {% endif %}
+
+            {% if p.images %}
+                <div class="gallery">
+                    {% for img in p.images %}
+                        <a href="{% static img %}" target="_blank" rel="noopener">
+                            <img src="{% static img %}" alt="{{ p.title }} screenshot {{ forloop.counter }}" loading="lazy">
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <!-- TEXT -->
+        <div class="project-body">
+
+            {% if p.status %}<span class="project-status">{{ p.status }}</span>{% endif %}
+
+            <h3>{{ p.title }}</h3>
+            {% if p.tagline %}<div class="project-tagline">{{ p.tagline }}</div>{% endif %}
+
+            <p>{{ p.summary }}</p>
+
+            {% if p.pipeline %}
+                <div class="pipeline-title">Build progress</div>
+                <ul class="pipeline">
+                    {% for s in p.pipeline %}
+                        <li class="{{ s.state }}">
+                            <span class="dot">{% if s.state == 'done' %}&#10003;{% elif s.state == 'progress' %}&hellip;{% else %}&middot;{% endif %}</span>
+                            <span>{{ s.step }}</span>
+                            <span class="state-label">
+                                {% if s.state == 'done' %}Done{% elif s.state == 'progress' %}In progress{% else %}Planned{% endif %}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% elif p.highlights %}
+                <ul class="highlights">
+                    {% for h in p.highlights %}<li>{{ h }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if p.metrics %}
+                <div class="project-metrics">
+                    {% for m in p.metrics %}
+                        <div class="metric"><strong>{{ m.value }}</strong><span>{{ m.label }}</span></div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if p.tags %}
+                <div class="project-tags">
+                    {% for t in p.tags %}<span class="project-tag">{{ t }}</span>{% endfor %}
+                </div>
+            {% endif %}
+
+            {% if p.links %}
+                <div class="project-links">
+                    {% for l in p.links %}
+                        <a href="{{ l.url }}" target="_blank" rel="noopener">{{ l.label }} &rarr;</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </div>
+
+    </article>
+
+    {% empty %}
+
+    <div class="empty-state">
+        <h3>Projects for this section are being added</h3>
+        <p>
+            I'm preparing case studies for this area. If you have a problem like
+            this on your desk right now, I'd be glad to talk it through.
+        </p>
+        <a href="{% url 'contact' %}" class="cta-btn dark">Get in touch &rarr;</a>
+    </div>
+
+    {% endfor %}
+
+    </div>
+
+</section>
+{% endfor %}
+<div class="section-end"></div>
+
+
+<!-- ==============================
+     CLOSING CTA
+============================== -->
+<div class="projects-cta">
+    <h2>Have a similar problem?</h2>
+    <p>Let's talk it through. No obligation, just a conversation.</p>
+    <a href="{% url 'contact' %}" class="cta-btn">Let's Talk &rarr;</a>
+</div>
+
+{% endblock content %}

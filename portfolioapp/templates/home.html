@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Ultimate Compass | Okutse Atsieno, data scientist and developer{% endblock %}
+
+{% block extra_style %}
+    /* The hero sits directly under the fixed navbar on this page */
+    .page-content { padding-top: 0; }
+
+    /* ==============================
+       HERO
+    ============================== */
+    .home-hero {
+        background: #0b1f3a;
+        color: #fff;
+        padding: 130px 25px 90px;
+        overflow: hidden;
+    }
+
+    .home-hero-inner {
+        max-width: 1150px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+        gap: 70px;
+        align-items: center;
+    }
+
+    .home-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: clamp(2.3rem, 4.6vw, 3.9rem);
+        line-height: 1.08;
+        letter-spacing: -0.01em;
+        margin: 0 0 24px;
+        max-width: 15ch;
+    }
+
+    .home-hero .lede {
+        font-size: 1.15rem;
+        line-height: 1.65;
+        color: #c9d3e3;
+        max-width: 46ch;
+        margin: 0 0 34px;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 34px;
+    }
+
+    .btn-sun,
+    .btn-line {
+        display: inline-flex;
+        align-items: center;
+        min-height: 50px;
+        padding: 0 28px;
+        border-radius: 30px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+    }
+
+    .btn-sun {
+        background: #FFD700;
+        color: #0b1f3a;
+        border: 2px solid #FFD700;
+    }
+
+    .btn-sun:hover,
+    .btn-sun:focus-visible {
+        background: #fff;
+        border-color: #fff;
+        color: #0b1f3a;
+    }
+
+    .btn-line {
+        color: #fff;
+        border: 2px solid rgba(255,255,255,.45);
+    }
+
+    .btn-line:hover,
+    .btn-line:focus-visible {
+        border-color: #FFD700;
+        color: #FFD700;
+    }
+
+    .hero-tools {
+        margin: 0;
+        font-size: .95rem;
+        color: #8fa0bb;
+        line-height: 1.6;
+    }
+
+    .hero-tools strong {
+        color: #c9d3e3;
+        font-weight: 600;
+    }
+
+    /* ---- demo in a browser frame, with a solid yellow block behind ---- */
+    .demo {
+        position: relative;
+        margin: 0;
+    }
+
+    .demo-block {
+        position: relative;
+    }
+
+    .demo-block::before {
+        content: "";
+        position: absolute;
+        inset: 18px -18px -18px 18px;
+        background: #FFD700;
+        border-radius: 14px;
+    }
+
+    .demo-frame {
+        position: relative;
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .demo-bar {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        height: 30px;
+        padding: 0 14px;
+        background: #e6ebf2;
+    }
+
+    .demo-bar i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #b6c0cf;
+        display: block;
+    }
+
+    .demo video {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #0b1f3a;
+    }
+
+    .demo figcaption {
+        position: relative;
+        margin-top: 34px;
+        font-size: .92rem;
+        color: #8fa0bb;
+    }
+
+    .demo figcaption a {
+        color: #FFD700;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255,215,0,.5);
+    }
+
+    .demo figcaption a:hover {
+        border-bottom-color: #FFD700;
+    }
+
+    /* ==============================
+       SELECTED WORK
+    ============================== */
+    .home-work {
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 90px 25px 80px;
+        scroll-margin-top: 60px;
+    }
+
+    .work-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px 30px;
+        margin-bottom: 26px;
+    }
+
+    .work-head h2 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+        color: #0b1f3a;
+        margin: 0;
+    }
+
+    .work-head a {
+        color: #0b1f3a;
+        font-weight: 700;
+        text-decoration: none;
+        border-bottom: 2px solid #FFD700;
+    }
+
+    .work-head a:hover { color: #9a8300; }
+
+    .work-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 2px solid #0b1f3a;
+    }
+
+    .work-row {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr) 150px;
+        gap: 30px;
+        align-items: center;
+        padding: 22px 14px;
+        border-bottom: 1px solid #d9dfe8;
+        text-decoration: none;
+        color: inherit;
+        transition: background-color .2s ease;
+    }
+
+    .work-row:hover,
+    .work-row:focus-visible {
+        background: #eef2f7;
+    }
+
+    .work-row img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        object-position: top left;
+        border-radius: 8px;
+        border: 1px solid #d9dfe8;
+        display: block;
+    }
+
+    .work-text h3 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin: 0 0 4px;
+    }
+
+    .work-text p {
+        margin: 0 0 6px;
+        color: #4a5568;
+        line-height: 1.55;
+        max-width: 56ch;
+    }
+
+    .work-kind {
+        font-size: .9rem;
+        font-weight: 700;
+        color: #1F7A4D;
+    }
+
+    .work-result {
+        text-align: right;
+        line-height: 1.15;
+    }
+
+    .work-result strong {
+        display: block;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.9rem;
+        color: #0b1f3a;
+    }
+
+    .work-result span {
+        font-size: .85rem;
+        color: #6c757d;
+    }
+
+    .work-result.status strong {
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    /* ==============================
+       CLOSING ASK
+    ============================== */
+    .home-ask {
+        background: #FFD700;
+        color: #0b1f3a;
+        padding: 70px 25px;
+    }
+
+    .home-ask-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px 50px;
+    }
+
+    .home-ask h2 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: clamp(1.7rem, 3vw, 2.3rem);
+        line-height: 1.2;
+        margin: 0;
+        max-width: 22ch;
+    }
+
+    .home-ask p {
+        margin: 10px 0 0;
+        font-size: 1.05rem;
+        max-width: 48ch;
+    }
+
+    .btn-ink {
+        display: inline-flex;
+        align-items: center;
+        min-height: 52px;
+        padding: 0 30px;
+        border-radius: 30px;
+        background: #0b1f3a;
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        border: 2px solid #0b1f3a;
+        transition: background-color .25s ease, color .25s ease;
+    }
+
+    .btn-ink:hover,
+    .btn-ink:focus-visible {
+        background: transparent;
+        color: #0b1f3a;
+    }
+
+    a:focus-visible,
+    .work-row:focus-visible {
+        outline: 3px solid #1F7A4D;
+        outline-offset: 3px;
+    }
+
+    .home-hero a:focus-visible {
+        outline-color: #FFD700;
+    }
+
+    /* ==============================
+       TABLET AND PHONE
+    ============================== */
+    @media (max-width: 992px) {
+        .home-hero { padding: 105px 22px 70px; }
+
+        .home-hero-inner {
+            grid-template-columns: 1fr;
+            gap: 54px;
+        }
+
+        .home-hero h1 { max-width: 18ch; }
+
+        .demo { margin-right: 18px; }
+    }
+
+    @media (max-width: 700px) {
+        .work-row {
+            grid-template-columns: 1fr;
+            gap: 14px;
+            padding: 22px 0;
+        }
+
+        .work-result {
+            text-align: left;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .home-work { padding: 64px 22px 56px; }
+        .home-ask { padding: 56px 22px; }
+        .btn-sun, .btn-line, .btn-ink { width: 100%; justify-content: center; }
+        .hero-actions { flex-direction: column; }
+    }
+{% endblock %}
+
+{% block content %}
+
+<!-- ==============================
+     HERO
+============================== -->
+<section class="home-hero">
+    <div class="home-hero-inner">
+
+        <div>
+            <h1>I turn messy data into tools people can act on.</h1>
+
+            <p class="lede">
+                I'm Okutse Atsieno, a data scientist and full-stack developer.
+                I build computer vision, machine learning and dashboard projects
+                for sports, farming, property, health and other industries. I also help businesses automate manual processes and make sense of their data.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn-sun" href="#work">See my work</a>
+                <a class="btn-line" href="{% url 'contact' %}">Get in touch</a>
+            </div>
+
+            <p class="hero-tools">
+                <strong>Built with</strong> Python, YOLOv8, Django and Power BI.
+            </p>
+        </div>
+
+        <figure class="demo">
+          <div class="demo-block">
+            <div class="demo-frame">
+                <div class="demo-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+                <video id="heroVideo" autoplay muted loop playsinline preload="metadata"
+                       poster="{% static 'thumbs/maize_poster.jpg' %}"
+                       aria-label="Demo of the maize leaf disease detection app">
+                    <source src="{% static 'videos/maize_leaf_disease.mp4' %}" type="video/mp4">
+                </video>
+            </div>
+          </div>
+            <figcaption>
+                Live demo: upload a maize leaf, get the disease and what to do about it.
+                <a href="{% url 'projects' %}#cv">See the project</a>
+            </figcaption>
+        </figure>
+
+    </div>
+</section>
+
+
+<!-- ==============================
+     SELECTED WORK
+============================== -->
+<section class="home-work" id="work">
+
+    <div class="work-head">
+        <h2>Selected work</h2>
+        <a href="{% url 'projects' %}">All projects</a>
+    </div>
+
+    <ul class="work-list">
+
+        <li>
+            <a class="work-row" href="{% url 'projects' %}#cv">
+                <img src="{% static 'thumbs/maize.jpg' %}" alt="Maize leaf disease app showing a diagnosis" loading="lazy">
+                <div class="work-text">
+                    <h3>Maize Leaf Disease Detection</h3>
+                    <p>A farmer uploads a leaf photo and gets the diagnosis, a confidence score and a treatment recommendation.</p>
+                    <span class="work-kind">Computer vision</span>
+                </div>
+                <div class="work-result"><strong>81%</strong><span>accuracy</span></div>
+            </a>
+        </li>
+
+        <li>
+            <a class="work-row" href="{% url 'projects' %}#predictive">
+                <img src="{% static 'thumbs/house.jpg' %}" alt="House price prediction app showing a predicted price in Kenya shillings" loading="lazy">
+                <div class="work-text">
+                    <h3>House Price Prediction</h3>
+                    <p>Pick a location, bedrooms and property type and get an instant price estimate in Kenya shillings.</p>
+                    <span class="work-kind">Machine learning</span>
+                </div>
+                <div class="work-result"><strong>0.79</strong><span>R² score</span></div>
+            </a>
+        </li>
+
+        <li>
+            <a class="work-row" href="{% url 'projects' %}#dashboards">
+                <img src="{% static 'thumbs/dashboard.jpg' %}" alt="Power BI dashboard of athlete fitness results" loading="lazy">
+                <div class="work-text">
+                    <h3>Athlete Performance Dashboard</h3>
+                    <p>One page that shows a coach how a squad performs on strength, balance, speed and agility tests.</p>
+                    <span class="work-kind">Power BI</span>
+                </div>
+                <div class="work-result"><strong>20</strong><span>athletes</span></div>
+            </a>
+        </li>
+
+        <li>
+            <a class="work-row" href="{% url 'projects' %}#dashboards">
+                <img src="{% static 'thumbs/tracker.jpg' %}" alt="Athlete Tracker web app assessment form" loading="lazy">
+                <div class="work-text">
+                    <h3>Athlete Tracker</h3>
+                    <p>A web platform where coaches build teams, register athletes and record fitness assessments.</p>
+                    <span class="work-kind">Full-stack web app</span>
+                </div>
+                <div class="work-result status"><strong>Working prototype</strong></div>
+            </a>
+        </li>
+
+        <li>
+            <a class="work-row" href="{% url 'projects' %}#cv">
+                <img src="{% static 'thumbs/football.jpg' %}" alt="Football pitch" loading="lazy">
+                <div class="work-text">
+                    <h3>AI Football Coach</h3>
+                    <p>Tracks every player and the ball in match video and turns the movement into coaching insight.</p>
+                    <span class="work-kind">Computer vision</span>
+                </div>
+                <div class="work-result status"><strong>In development</strong></div>
+            </a>
+        </li>
+
+    </ul>
+
+</section>
+
+
+<!-- ==============================
+     CLOSING ASK
+============================== -->
+<section class="home-ask">
+    <div class="home-ask-inner">
+        <div>
+            <h2>Got messy data or a manual process?</h2>
+            <p>Tell me what you're dealing with. I'll reply within a day or two.</p>
+        </div>
+        <a class="btn-ink" href="{% url 'contact' %}">Send me a message</a>
+    </div>
+</section>
+
+
+<script>
+    // Respect reduced-motion settings: show the still poster instead of a looping video
+    (function () {
+        var v = document.getElementById("heroVideo");
+        if (v && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            v.removeAttribute("autoplay");
+            v.pause();
+            v.setAttribute("controls", "");
+        }
+    })();
+</script>
+
+{% endblock content %}

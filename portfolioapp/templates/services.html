@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Services | Ultimate Compass{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* ==============================
+       HEADING
+    ============================== */
+
+    .services-heading {
+        text-align: center;
+        max-width: 750px;
+        margin: 60px auto 20px;
+        padding: 0 25px;
+    }
+
+    .services-heading h1 {
+        font-size: 2.6rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 15px;
+    }
+
+    .services-heading p {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+
+
+    /* ==============================
+       SERVICE CARDS GRID
+    ============================== */
+
+    .services-grid {
+        max-width: 1200px;
+        margin: 50px auto 80px;
+        padding: 0 25px;
+
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 30px;
+    }
+
+
+    /* ==============================
+       SERVICE CARD
+    ============================== */
+
+    .service-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-top: 5px solid #FFD700;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .service-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.14);
+    }
+
+
+    /* ==============================
+       FIRST 3 CARDS
+    ============================== */
+
+    .service-card:nth-child(-n+3) {
+        grid-column: span 2;
+    }
+
+
+    /* ==============================
+       LAST 2 CARDS
+       CENTERED UNDER FIRST 3
+    ============================== */
+
+    .service-card:nth-child(4) {
+        grid-column: 2 / span 2;
+    }
+
+    .service-card:nth-child(5) {
+        grid-column: 4 / span 2;
+    }
+
+
+    /* ==============================
+       ICON
+    ============================== */
+
+    .service-icon {
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+    }
+
+
+    /* ==============================
+       CARD TITLE
+    ============================== */
+
+    .service-card h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 12px;
+    }
+
+
+    /* ==============================
+       LABEL
+    ============================== */
+
+    .service-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #9a8300;
+        margin-bottom: 4px;
+    }
+
+
+    /* ==============================
+       CARD TEXT
+    ============================== */
+
+    .service-card p {
+        color: #444;
+        line-height: 1.65;
+        margin-bottom: 18px;
+        font-size: 0.98rem;
+    }
+
+
+    /* ==============================
+       TAGS
+    ============================== */
+
+    .service-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 22px;
+    }
+
+    .service-tag {
+        background: #f3f4f6;
+        color: #0b1f3a;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+
+
+    /* ==============================
+       PROJECT LINKS
+    ============================== */
+
+    .service-link {
+        margin-top: auto;
+        color: #0b1f3a;
+        font-weight: 700;
+        text-decoration: none;
+        border-bottom: 2px solid #FFD700;
+        align-self: flex-start;
+        transition: 0.3s ease;
+    }
+
+    .service-link:hover {
+        color: #9a8300;
+    }
+
+
+    /* ==============================
+       CLOSING CTA
+    ============================== */
+
+    .services-cta {
+        background: #0b1f3a;
+        color: white;
+        text-align: center;
+        padding: 60px 25px;
+    }
+
+    .services-cta h2 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .services-cta p {
+        color: #d6d6d6;
+        margin-bottom: 25px;
+        font-size: 1.05rem;
+    }
+
+    .services-cta a {
+        display: inline-block;
+        padding: 13px 30px;
+        background: #FFD700;
+        color: #0b1f3a;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .services-cta a:hover {
+        background: white;
+        transform: translateY(-3px);
+    }
+
+
+    /* ==============================
+       RESPONSIVE DESIGN
+    ============================== */
+
+    @media (max-width: 900px) {
+
+        .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .service-card:nth-child(n) {
+            grid-column: span 1;
+        }
+
+        .service-card:nth-child(5) {
+            grid-column: 1 / -1;
+        }
+    }
+
+
+    @media (max-width: 600px) {
+
+        .services-heading {
+            margin-top: 40px;
+        }
+
+        .services-heading h1 {
+            font-size: 2.1rem;
+        }
+
+        .services-heading p {
+            font-size: 1rem;
+        }
+
+        .services-grid {
+            grid-template-columns: 1fr;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .service-card:nth-child(n) {
+            grid-column: span 1;
+        }
+
+    }
+
+</style>
+
+
+<!-- ==============================
+     HEADING
+============================== -->
+
+<div class="services-heading">
+
+    <h1>Data Services</h1>
+
+    <p>
+        I work with businesses that need to make sense of their data  whether
+        that means visualizing it clearly, predicting what happens next, or
+        automating what a human eye currently has to check manually.
+    </p>
+
+</div>
+
+
+<!-- ==============================
+     SERVICE CARDS
+============================== -->
+
+<div class="services-grid">
+
+
+    <!-- ==========================
+         POWER BI
+    =========================== -->
+
+    <div class="service-card">
+
+        <div class="service-icon">📊</div>
+
+        <div class="service-label">Problem</div>
+
+        <p>
+            Your data exists, but no one can see it clearly or use it to
+            decide anything.
+        </p>
+
+        <div class="service-label">What I Deliver</div>
+
+        <h3>Power BI & Dashboards</h3>
+
+        <p>
+            Interactive dashboards and automated reports built so non-technical
+            stakeholders can actually use them daily  not just view them once.
+        </p>
+
+        <div class="service-tags">
+            <span class="service-tag">Sales Dashboards</span>
+            <span class="service-tag">KPI Tracking</span>
+            <span class="service-tag">Automated Reports</span>
+        </div>
+
+        <a href="{% url 'projects' %}#dashboards" class="service-link">
+            See dashboard projects →
+        </a>
+
+    </div>
+
+
+    <!-- ==========================
+         PREDICTIVE MODELLING
+    =========================== -->
+
+    <div class="service-card">
+
+        <div class="service-icon">📈</div>
+
+        <div class="service-label">Problem</div>
+
+        <p>
+            You know what happened  you need to know what's likely to happen next.
+        </p>
+
+        <div class="service-label">What I Deliver</div>
+
+        <h3>Predictive Modelling</h3>
+
+        <p>
+            Machine learning models for forecasting, classification, and risk
+            scoring  built for accuracy and explainability, so decision-makers
+            trust the output.
+        </p>
+
+        <div class="service-tags">
+            <span class="service-tag">Churn Prediction</span>
+            <span class="service-tag">Sales Forecasting</span>
+            <span class="service-tag">Risk Scoring</span>
+        </div>
+
+        <a href="{% url 'projects' %}#predictive" class="service-link">
+            See predictive modelling projects →
+        </a>
+
+    </div>
+
+
+    <!-- ==========================
+         COMPUTER VISION
+    =========================== -->
+
+    <div class="service-card">
+
+        <div class="service-icon">👁️</div>
+
+        <div class="service-label">Problem</div>
+
+        <p>
+            Something in your process currently needs a human to look and judge
+            and it doesn't scale.
+        </p>
+
+        <div class="service-label">What I Deliver</div>
+
+        <h3>Computer Vision</h3>
+
+        <p>
+            Object detection, tracking, and automated visual inspection systems
+            that process images and video in real time.
+        </p>
+
+        <div class="service-tags">
+            <span class="service-tag">Sports Analytics</span>
+            <span class="service-tag">Quality Inspection</span>
+            <span class="service-tag">Real-Time Monitoring</span>
+        </div>
+
+        <a href="{% url 'projects' %}#cv" class="service-link">
+            See computer vision projects →
+        </a>
+
+    </div>
+
+
+    <!-- ==========================
+         DATA ANALYTICS
+    =========================== -->
+
+    <div class="service-card">
+
+        <div class="service-icon">🔎</div>
+
+        <div class="service-label">Problem</div>
+
+        <p>
+            You have data, but you're not sure what it is telling you,
+            where problems are coming from, or where opportunities exist.
+        </p>
+
+        <div class="service-label">What I Deliver</div>
+
+        <h3>Data Analytics</h3>
+
+        <p>
+            I analyze business data to uncover patterns, trends, performance
+            gaps, and actionable insights that help you understand what is
+            happening and why.
+        </p>
+
+        <div class="service-tags">
+            <span class="service-tag">Data Analysis</span>
+            <span class="service-tag">Business Insights</span>
+            <span class="service-tag">Trend Analysis</span>
+        </div>
+
+        <a href="{% url 'projects' %}#dashboards" class="service-link">
+            See analytics projects →
+        </a>
+
+    </div>
+
+
+    <!-- ==========================
+         WEB DEVELOPMENT
+    =========================== -->
+
+    <div class="service-card">
+
+        <div class="service-icon">💻</div>
+
+        <div class="service-label">Problem</div>
+
+        <p>
+            Your business relies on manual processes or disconnected tools
+            that make it difficult to manage information efficiently.
+        </p>
+
+        <div class="service-label">What I Deliver</div>
+
+        <h3>Web Development</h3>
+
+        <p>
+            Custom web applications that turn business processes into practical
+            digital systems  combining modern web development with databases,
+            analytics, and intelligent features.
+        </p>
+
+        <div class="service-tags">
+            <span class="service-tag">Django</span>
+            <span class="service-tag">Business Systems</span>
+            <span class="service-tag">Data-Driven Apps</span>
+        </div>
+
+        <a href="{% url 'projects' %}#dashboards" class="service-link">
+            See web app projects →
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ==============================
+     CLOSING CTA
+============================== -->
+
+<div class="services-cta">
+
+    <h2>Not sure which service fits your problem?</h2>
+
+    <p>
+        Let's talk it through  no obligation, just a conversation.
+    </p>
+
+    <a href="{% url 'contact' %}">
+        Let's Talk →
+    </a>
+
+</div>
+
+
+{% endblock content %}

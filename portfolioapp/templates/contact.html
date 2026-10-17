@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact | Ultimate Compass{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .contact-heading {
+        text-align: center;
+        margin: 80px auto 50px;
+        padding: 0 25px;
+    }
+
+    .contact-heading h1 {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 10px;
+    }
+
+    .contact-heading p {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+
+    /* ===== CENTERED FORM ===== */
+
+    .contact-form {
+        max-width: 650px;
+        margin: 0 auto 90px;
+        padding: 0 25px;
+    }
+
+    .contact-form label {
+        font-weight: 600;
+        color: #0b1f3a;
+        margin-bottom: 6px;
+        display: block;
+        margin-top: 15px;
+    }
+
+    .contact-form input[type="text"],
+    .contact-form input[type="email"],
+    .contact-form textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #dcdcdc;
+        padding: 12px 15px;
+        font-family: inherit;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+        border-color: #FFD700;
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.25);
+        outline: none;
+    }
+
+    .contact-submit {
+        display: block;
+        width: 100%;
+        margin-top: 25px;
+        padding: 14px 30px;
+        background: #0b1f3a;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s ease;
+    }
+
+    .contact-submit:hover {
+        background: #FFD700;
+        color: #0b1f3a;
+        transform: translateY(-3px);
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 10px;
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .field-errors {
+        color: #c0392b;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+</style>
+
+<!-- HEADING -->
+<div class="contact-heading">
+    <h1>Let's Work Together</h1>
+    <p>Open to consulting, contract, and full-time data roles</p>
+</div>
+
+<!-- CENTERED FORM -->
+<div class="contact-form">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'contact' %}">
+        {% csrf_token %}
+
+        <label for="{{ form.name.id_for_label }}">Your Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+            <div class="field-errors">{{ form.name.errors }}</div>
+        {% endif %}
+
+        <label for="{{ form.email.id_for_label }}">Your Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+            <div class="field-errors">{{ form.email.errors }}</div>
+        {% endif %}
+
+        <label for="{{ form.subject.id_for_label }}">Subject</label>
+        {{ form.subject }}
+
+        <label for="{{ form.message.id_for_label }}">Message</label>
+        {{ form.message }}
+        {% if form.message.errors %}
+            <div class="field-errors">{{ form.message.errors }}</div>
+        {% endif %}
+
+        <button type="submit" class="contact-submit">Send Message →</button>
+
+    </form>
+
+</div>
+
+{% endblock content %}

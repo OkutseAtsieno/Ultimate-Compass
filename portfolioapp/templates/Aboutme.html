@@ -1,0 +1,144 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About | Ultimate Compass{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .about-section {
+        max-width: 850px;
+        margin: 80px auto;
+        padding: 0 25px;
+        text-align: center;
+    }
+
+    .about-section h1 {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: #0b1f3a;
+        margin-bottom: 40px;
+    }
+
+    .about-text {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #333;
+        min-height: 4.5em; /* reserves space so page doesn't jump while typing */
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    /* blinking cursor while typing */
+    .typing-cursor::after {
+        content: "|";
+        animation: blink 0.8s infinite;
+        color: #0b1f3a;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+
+    .about-block {
+        opacity: 0;
+        transform: translateY(15px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .about-block.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .about-cta {
+        margin-top: 40px;
+    }
+
+    .about-cta a {
+        display: inline-block;
+        padding: 13px 30px;
+        background: #0b1f3a;
+        color: white;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.3s ease;
+    }
+
+    .about-cta a:hover {
+        transform: translateY(-3px);
+        background: #FFD700;
+        color: #0b1f3a;
+    }
+
+</style>
+
+<section class="about-section">
+
+    <h1>About Me</h1>
+
+    <!-- BLOCK 1: Hook + Why (typed effect) -->
+    <p class="about-text" id="typedText"></p>
+
+    <!-- BLOCK 2: How I work -->
+    <div class="about-block" id="howIWork">
+        <p>
+            I don't start with the algorithm  I start with the business question.
+            From there, I build the simplest solution that actually solves it,
+            whether that's a Power BI dashboard, a deployed ML model, or a computer
+            vision pipeline. Good data work should be explainable, not just accurate 
+            if a client can't understand why a model made a decision, it isn't finished yet.
+        </p>
+    </div>
+
+    <!-- BLOCK 3: CTA -->
+    <div class="about-block about-cta" id="ctaBlock">
+        <p>Have a data problem that's costing you time, money, or clarity?</p>
+        <a href="{% url 'contact' %}">Let's talk →</a>
+    </div>
+
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const text = "I'm Okutse Atsieno a data scientist who turns messy, real-world data into systems " +
+                      "that help businesses see clearly and decide faster. My work sits " +
+                      "at the intersection of machine learning, computer vision, and " +
+                      "analytics, and the goal is always the same: give people better " +
+                      "information so they can make better decisions.";
+
+        const target = document.getElementById("typedText");
+        target.classList.add("typing-cursor");
+
+        let i = 0;
+        const speed = 18; // ms per letter — lower = faster
+
+        function typeLetter() {
+            if (i < text.length) {
+                target.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeLetter, speed);
+            } else {
+                target.classList.remove("typing-cursor");
+                revealBlocks();
+            }
+        }
+
+        function revealBlocks() {
+            document.getElementById("howIWork").classList.add("visible");
+            setTimeout(function () {
+                document.getElementById("ctaBlock").classList.add("visible");
+            }, 300);
+        }
+
+        typeLetter();
+
+    });
+</script>
+
+{% endblock content %}
