@@ -13,22 +13,30 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-ek&5^&gde!@@(8s0#xlp*mbz$0!c03cvx0=@vjl*bk_tfip7bb',  # dev only, set DJANGO_SECRET_KEY in production
-)
+# ---------------------------------------------------------------------------
+# Core security settings
+# Everything here is read from environment variables so no secret lives in the
+# code. Locally, set DJANGO_DEBUG=1 (debug is OFF unless you ask for it).
+# ---------------------------------------------------------------------------
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
+DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'dev-only-not-secret'   # local use only
+    else:
+        raise ImproperlyConfigured('Set the DJANGO_SECRET_KEY environment variable on the server.')
+
+# Example: DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
 ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h]
 
 
@@ -59,7 +67,7 @@ ROOT_URLCONF = 'myportfolio.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / 'templates'],   # absolute path: works from any start folder
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,19 +125,63 @@ USE_I18N = True
 USE_TZ = True
 
 
+# ---------------------------------------------------------------------------
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+# ---------------------------------------------------------------------------
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # where "collectstatic" gathers files for the server
+
+# WhiteNoise serves static files when DEBUG is off. It is switched on only if
+# the package is installed, so the site still runs locally before you install it.
+try:
+    import whitenoise  # noqa: F401
+except ImportError:
+    pass
+else:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STORAGES = {
+        'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ---------------------------------------------------------------------------
+# HTTPS and cookie security (only applied when DEBUG is off, i.e. on the server)
+#   DJANGO_CSRF_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+#   DJANGO_SSL_REDIRECT=0   -> turn the HTTPS redirect off if it ever loops
+# ---------------------------------------------------------------------------
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('DJANGO_CSRF_ORIGINS', '').split(',') if o]
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SSL_REDIRECT', '1') == '1'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # only correct behind a proxy
+    SECURE_HSTS_SECONDS = 3600   # start small; raise once HTTPS is confirmed working
+
+
+# ---------------------------------------------------------------------------
+# Logging: print messages (such as a failed contact email) to the console/log
+# ---------------------------------------------------------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'root': {'handlers': ['console'], 'level': 'INFO'},
+}
+
+
 # ---------------------------------------------------------------------------
 # Email (contact form)
-# Local: emails print to the terminal. To really receive them, set these
-# environment variables (use a Gmail "App Password", not your normal password):
+# Without the two variables below, emails print to the terminal. To really
+# receive them, set these environment variables (use a Gmail "App Password",
+# not your normal password):
 #   EMAIL_HOST_USER=atsienookutse@gmail.com
 #   EMAIL_HOST_PASSWORD=<16-char app password>
 # ---------------------------------------------------------------------------

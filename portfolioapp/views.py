@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.staticfiles import finders
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.shortcuts import redirect, render
 
 from .forms import ContactForm
@@ -47,10 +47,19 @@ def projects(request):
 # Contact
 # ---------------------------------------------------------------------------
 
+SUCCESS_MESSAGE = "Thank you! Your message has been sent. I'll get back to you shortly."
+
+
 def contact(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
+            # Honeypot: a real visitor never sees this field, so any text means a bot.
+            # Pretend it worked (so the bot doesn't adapt) but send nothing.
+            if form.cleaned_data.get('website'):
+                messages.success(request, SUCCESS_MESSAGE)
+                return redirect('contact')
+
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             subject = form.cleaned_data['subject'] or f"New message from {name}"
@@ -59,13 +68,13 @@ def contact(request):
             full_message = f"From: {name} ({email})\n\n{message}"
 
             try:
-                send_mail(
+                EmailMessage(
                     subject=subject,
-                    message=full_message,
+                    body=full_message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.CONTACT_RECEIVER_EMAIL],
-                    fail_silently=False,
-                )
+                    to=[settings.CONTACT_RECEIVER_EMAIL],
+                    reply_to=[email],               # pressing Reply writes to the visitor
+                ).send(fail_silently=False)
             except Exception:
                 logger.exception("Contact form email failed")
                 messages.error(
@@ -74,7 +83,7 @@ def contact(request):
                     "Please email me directly at atsienookutse@gmail.com.",
                 )
             else:
-                messages.success(request, "Thank you! Your message has been sent. I'll get back to you shortly.")
+                messages.success(request, SUCCESS_MESSAGE)
                 return redirect('contact')
     else:
         form = ContactForm()

@@ -1,5 +1,6 @@
 from django import forms
 
+
 class ContactForm(forms.Form):
     name = forms.CharField(
         max_length=100,
@@ -15,4 +16,11 @@ class ContactForm(forms.Form):
     )
     message = forms.CharField(
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': "Tell me about your project..."})
+    )
+
+    # Honeypot: hidden from people, filled in by bots
+    website = forms.CharField(
+        required=False,
+        label='Leave this empty',
+        widget=forms.TextInput(attrs={'tabindex': '-1', 'autocomplete': 'off'}),
     )

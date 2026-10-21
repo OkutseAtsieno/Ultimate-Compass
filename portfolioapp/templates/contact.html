@@ -149,6 +149,12 @@
             <div class="field-errors">{{ form.message.errors }}</div>
         {% endif %}
 
+        <!-- Honeypot: hidden from people, bots fill it in -->
+        <div style="position:absolute; left:-5000px;" aria-hidden="true">
+            <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+            {{ form.website }}
+        </div>
+
         <button type="submit" class="contact-submit">Send Message →</button>
 
     </form>

@@ -6,14 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Ultimate Compass{% endblock %}</title>
   <meta name="description" content="Ultimate Compass: computer vision, machine learning and dashboard projects by Okutse Atsieno, data scientist and full-stack developer.">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FFD700'/%3E%3Ccircle cx='32' cy='32' r='24' fill='none' stroke='%230b1f3a' stroke-width='4'/%3E%3Cpolygon points='32,10 41,32 23,32' fill='%230b1f3a'/%3E%3Cpolygon points='32,54 41,32 23,32' fill='none' stroke='%230b1f3a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="{% static 'logo/favicon.svg' %}">
+  <link rel="icon" href="{% static 'logo/favicon.ico' %}" sizes="48x48">
+  <link rel="apple-touch-icon" href="{% static 'logo/apple-touch-icon.png' %}">
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <!-- Playfair Display font -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <!-- Poppins: the one font for the whole site, the logo and the merchandise -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     html, body {
@@ -21,6 +25,23 @@
       padding: 0;
       width: 100%;
       /* overflow: hidden removed — this was blocking all page scrolling */
+    }
+
+    /* ==============================
+       ONE FONT FOR THE WHOLE SITE
+       Poppins everywhere, same as the logo and merchandise.
+       The !important makes it win over any other font set inside a page's own
+       <style> block (home.html still names Playfair Display in a few rules).
+       Icons and code blocks are left alone.
+    ============================== */
+
+    :root {
+      --font-brand: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body,
+    body *:not(.bi):not(code):not(pre):not(kbd):not(samp) {
+      font-family: var(--font-brand) !important;
     }
 
     /* ==============================
@@ -39,21 +60,52 @@
     .navbar-custom .navbar-brand,
     .navbar-custom .nav-link,
     .navbar-custom .dropdown-item {
-      font-family: 'Playfair Display', serif;
-      font-weight: 400;
-      font-style: italic;
-      color: #000 !important;
+      font-weight: 500;
+      font-style: normal;
+      color: #0b1f3a !important;   /* brand navy, same as the logo */
     }
 
     .navbar-custom .nav-link:hover,
     .navbar-custom .dropdown-item:hover {
-      color: #333 !important;
+      color: #1c3d6e !important;
     }
 
     .navbar-custom .navbar-brand {
       display: inline-flex;
       align-items: center;
       gap: 9px;
+    }
+
+    .navbar-custom .brand-mark {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      color: #0b1f3a;
+    }
+
+    .navbar-custom .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .navbar-custom .brand-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .navbar-custom .brand-slogan {
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      opacity: 0.85;
+    }
+
+    @media (max-width: 380px) {
+      .navbar-custom .brand-mark { width: 36px; height: 36px; }
+      .navbar-custom .brand-name { font-size: 1rem; }
+      .navbar-custom .brand-slogan { font-size: 0.58rem; }
     }
 
     .navbar-custom .nav-link.active {
@@ -218,12 +270,21 @@
   <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="{% url 'home' %}" aria-label="Ultimate Compass, home">
-        <svg class="brand-mark" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true">
-          <circle cx="32" cy="32" r="26" fill="none" stroke="#0b1f3a" stroke-width="5"/>
-          <polygon points="32,10 42,32 22,32" fill="#0b1f3a"/>
-          <polygon points="32,54 42,32 22,32" fill="none" stroke="#0b1f3a" stroke-width="3.5" stroke-linejoin="round"/>
+        <svg class="brand-mark" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+          <defs>
+            <mask id="bmr" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><g fill="#000" stroke="#000" stroke-width="5" stroke-linejoin="round"><polygon points="100,4 108,94 92,94"/><polygon points="100,196 108,106 92,106"/><polygon points="196,100 124,92 124,108"/><polygon points="4,100 76,92 76,108"/><g transform="rotate(40 100 100)"><polygon points="100,30 112,100 88,100"/><polygon points="100,170 112,100 88,100"/></g></g></mask>
+            <mask id="bmp" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><g fill="#000" stroke="#000" stroke-width="5" stroke-linejoin="round"><g transform="rotate(40 100 100)"><polygon points="100,30 112,100 88,100"/><polygon points="100,170 112,100 88,100"/></g></g><circle cx="100" cy="100" r="13.5" fill="#000"/></mask>
+            <mask id="bmn" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><circle cx="100" cy="100" r="13.5" fill="#000"/></mask>
+          </defs>
+          <circle cx="100" cy="100" r="62" fill="none" stroke="currentColor" stroke-width="9" mask="url(#bmr)"/>
+          <g mask="url(#bmp)"><polygon points="100,4 108,94 92,94" fill="currentColor"/><polygon points="100,196 108,106 92,106" fill="currentColor"/><polygon points="196,100 124,92 124,108" fill="currentColor"/><polygon points="4,100 76,92 76,108" fill="currentColor"/></g>
+          <g transform="rotate(40 100 100)" mask="url(#bmn)"><polygon points="100,30 112,100 88,100" fill="currentColor"/><polygon points="100,170 112,100 88,100" fill="currentColor"/></g>
+          <circle cx="100" cy="100" r="8.5" fill="none" stroke="currentColor" stroke-width="3"/>
         </svg>
-        <span>ULTIMATE <b>COMPASS</b></span>
+        <span class="brand-text">
+          <span class="brand-name">Ultimate Compass</span>
+          <span class="brand-slogan">Turning Data Into Better Decisions</span>
+        </span>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
         <span class="navbar-toggler-icon"></span>
