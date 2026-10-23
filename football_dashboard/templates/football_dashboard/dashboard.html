@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Football AI Coach</title>
+<meta name="description" content="Match video turned into tracked positions, metrics and plain-language coach notes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+  /* ---------- tokens ---------- */
+  :root {
+    --turf: #0e3b29;          /* page background: floodlit turf */
+    --turf-2: #124632;        /* mown stripe */
+    --turf-3: #0a2c1f;        /* nav / footer */
+    --chalk: #f3f6f1;         /* panels */
+    --chalk-2: #e6ece3;       /* table stripes, chips */
+    --ink: #0c1f17;           /* text on chalk */
+    --ink-soft: #44564b;      /* secondary text on chalk (7:1 on chalk) */
+    --line: #c9d4c8;          /* hairlines on chalk */
+    --card-y: #ffd23f;        /* referee yellow: the single accent */
+    --card-r: #d6403a;        /* red card: low confidence */
+    --team-white: #ffffff;
+    --team-lime: #b6f23a;
+    --shadow: 6px 6px 0 rgba(0, 0, 0, .28);
+    --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+    --body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--turf); color: var(--chalk);
+    font: 400 1rem/1.6 var(--body); font-stretch: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--card-y); outline-offset: 3px; }
+
+  /* ---------- hero: mown stripes + chalk lines ---------- */
+  .hero {
+    position: relative; overflow: hidden; isolation: isolate;
+    padding: clamp(56px, 9vw, 112px) 20px clamp(48px, 7vw, 88px);
+  }
+  .stripes {
+    position: absolute; inset: 0; z-index: -2;
+    background: repeating-linear-gradient(90deg, var(--turf) 0 9%, var(--turf-2) 9% 18%);
+    animation: wipe 1.1s cubic-bezier(.22, .8, .2, 1) both;   /* the one page-load moment */
+  }
+  @keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  .chalk-lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; opacity: .32; }
+  .hero-inner { max-width: 1100px; margin: 0 auto; }
+  .hero h1 {
+    margin: 0; font: 800 clamp(3.2rem, 11vw, 8rem)/.9 var(--display); font-stretch: 68%;
+    letter-spacing: -.01em; color: var(--chalk);
+  }
+  .hero .lede { margin: 22px 0 0; max-width: 34ch; font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.4; color: #dbe8dc; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn {
+    display: inline-block; padding: 12px 22px; font: 700 1rem/1 var(--body); text-decoration: none;
+    border: 2px solid var(--chalk); color: var(--chalk); border-radius: 3px;
+  }
+  .btn.primary { background: var(--card-y); border-color: var(--card-y); color: var(--ink); }
+  .btn:hover { background: var(--chalk); color: var(--ink); border-color: var(--chalk); }
+
+  /* key facts drawn as penalty boxes */
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: clamp(36px, 6vw, 64px); }
+  .fact {
+    position: relative; padding: 22px 18px 58px; border: 2px solid rgba(243, 246, 241, .85);
+    background: rgba(10, 44, 31, .55);
+  }
+  .fact::before {                                         /* the six-yard box inside the penalty box */
+    content: ""; position: absolute; left: 50%; bottom: -2px; width: 46%;
+    transform: translateX(-50%); border: 2px solid rgba(243, 246, 241, .85); border-bottom: 0; height: 26px;
+  }
+  .fact b { display: block; font: 800 clamp(2rem, 5vw, 3.2rem)/1 var(--display); font-stretch: 72%; color: var(--card-y); }
+  .fact span { display: block; margin-top: 6px; max-width: 18ch; font-size: .95rem; color: #dbe8dc; }
+
+  /* ---------- sticky navigation ---------- */
+  .nav { position: sticky; top: 0; z-index: 20; background: var(--turf-3); border-bottom: 2px solid rgba(243, 246, 241, .18); }
+  .nav ul { display: flex; gap: 4px; margin: 0 auto; padding: 0 12px; max-width: 1100px; list-style: none; overflow-x: auto; }
+  .nav a {
+    display: block; padding: 14px 14px 12px; white-space: nowrap; text-decoration: none; font-weight: 600; font-size: .95rem;
+    color: #bfd3c4; border-bottom: 3px solid transparent;
+  }
+  .nav a:hover { color: var(--chalk); }
+  .nav a.on { color: var(--chalk); border-bottom-color: var(--card-y); }
+
+  /* ---------- panels ---------- */
+  main { max-width: 1100px; margin: 0 auto; padding: 36px 16px 24px; }
+  .panel {
+    background: var(--chalk); color: var(--ink); border-radius: 4px; box-shadow: var(--shadow);
+    padding: clamp(18px, 3vw, 30px); margin-bottom: 34px; scroll-margin-top: 64px;
+  }
+  .panel h2 {
+    display: flex; align-items: center; gap: 12px; margin: 0 0 6px;
+    font: 800 clamp(1.8rem, 4vw, 2.6rem)/1 var(--display); font-stretch: 70%; letter-spacing: -.005em;
+  }
+  .panel h2::before {                                     /* referee card as the section marker */
+    content: ""; flex: none; width: 16px; height: 22px; background: var(--card-y);
+    border-radius: 2px; transform: rotate(-8deg); box-shadow: 2px 2px 0 rgba(12, 31, 23, .25);
+  }
+  .panel .intro { margin: 0 0 18px; max-width: 62ch; color: var(--ink-soft); }
+  .note { margin: 12px 0 0; max-width: 78ch; font-size: .9rem; color: var(--ink-soft); }
+  .stage { background: #fff; border: 1px solid var(--line); border-radius: 3px; padding: 6px; }
+
+  .heat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+  .heat-grid .cap { margin: 0 0 6px; font-weight: 700; }
+  .heat-grid .cap small { display: block; font-weight: 400; color: var(--ink-soft); }
+
+  /* ---------- tables ---------- */
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 9px 12px; white-space: nowrap; }
+  thead th, tr:first-child > th { background: var(--turf); color: var(--chalk); font-weight: 600; }
+  tbody tr:nth-child(even) td { background: var(--chalk-2); }
+  td strong { color: var(--ink); }
+  .chip { display: inline-flex; align-items: center; gap: 7px; }
+  .chip::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; }
+  .chip.lime::before { background: var(--team-lime); }
+  .conf { display: inline-block; padding: 2px 9px; border-radius: 3px; font-size: .82rem; font-weight: 700; }
+  .conf.high { background: #cfeed6; color: #0d4a24; }
+  .conf.medium { background: #ffe9a3; color: #5b4300; }
+  .conf.low { background: #f9c9c6; color: #7a1712; }
+
+  /* ---------- coach notes ---------- */
+  .notes p { max-width: 70ch; margin: 0 0 12px; }
+  .notes p strong { font: 800 1.35rem/1.2 var(--display); font-stretch: 75%; color: var(--ink); }
+  .notes ul { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 12px; }
+  .notes li {
+    margin: 0; padding: 14px 18px; max-width: 78ch; background: #fff;
+    border: 1px solid var(--line); border-left: 6px solid var(--card-y); border-radius: 3px;
+  }
+  .notes li strong { color: var(--ink); }
+
+
+  /* ---------- key to the terms ---------- */
+  .key { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin: 0; }
+  .key div { padding: 12px 16px; background: #fff; border: 1px solid var(--line); border-left: 6px solid var(--turf); border-radius: 3px; }
+  .key dt { font: 800 1.15rem/1.2 var(--display); font-stretch: 78%; color: var(--ink); }
+  .key dd { margin: 4px 0 0; font-size: .92rem; color: var(--ink-soft); }
+  .panel .intro a, .note a { color: var(--ink); font-weight: 700; text-decoration-color: var(--card-y); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+
+  footer { background: var(--turf-3); padding: 28px 20px 40px; color: #bfd3c4; font-size: .9rem; }
+  footer p { max-width: 1100px; margin: 0 auto; }
+
+  /* ---------- small screens ---------- */
+  @media (max-width: 760px) {
+    .facts { grid-template-columns: repeat(2, 1fr); }
+    .panel { box-shadow: 4px 4px 0 rgba(0, 0, 0, .28); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stripes { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="stripes"></div>
+  <svg class="chalk-lines" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="#f3f6f1" stroke-width="3">
+      <line x1="820" y1="0" x2="820" y2="600"/>
+      <circle cx="820" cy="300" r="120"/>
+      <rect x="820" y="140" width="420" height="320"/>
+      <rect x="820" y="220" width="150" height="160"/>
+    </g>
+    <circle cx="820" cy="300" r="5" fill="#f3f6f1"/>
+  </svg>
+  <div class="hero-inner">
+    <h1>Football AI Coach</h1>
+    <p class="lede">Thirty seconds of match video, tracked, measured and explained in plain language.</p>
+    <div class="cta">
+      <a class="btn primary" href="#replay">Watch the replay</a>
+      <a class="btn" href="#notes">Read the coach notes</a>
+    </div>
+    <div class="facts">
+      {% if player_table %}<div class="fact"><b>{{ player_table|length }}</b><span>tracking IDs followed</span></div>{% endif %}
+      <div class="fact"><b>{{ events|length }}</b><span>events found in the clip</span></div>
+      {% if heat %}<div class="fact"><b>{{ heat.n.white|add:heat.n.lime }}</b><span>tracked player-steps</span></div>{% endif %}
+      <div class="fact"><b>~1 m</b><span>position accuracy</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Sections">
+  <ul>
+    <li><a href="#replay">Replay</a></li>
+    <li><a href="#heat">Heat maps</a></li>
+    <li><a href="#load">Player load</a></li>
+    <li><a href="#players">Players</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#notes">Coach notes</a></li>
+    <li><a href="#key">Key</a></li>
+    <li><a href="#data">Data</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <section class="panel" id="replay">
+    <h2>Pitch replay</h2>
+    <p class="intro">Every tracked player, moving through the clip. Press play, or drag the slider to any moment.</p>
+    {% if tracks %}
+      <div class="stage"><div id="pitch" style="width:100%;height:520px"></div></div>
+      <p class="note">White attacks right, lime attacks left. The far touchline is at the top, as in the video. Positions are accurate to roughly 1 m.</p>
+      {{ tracks|json_script:"tracks-data" }}
+    {% else %}
+      <p class="note">{{ tracks_msg }}</p>
+    {% endif %}
+  </section>
+
+  <section class="panel" id="heat">
+    <h2>Heat maps</h2>
+    <p class="intro">Where each team spent its time. Brighter cells mean more of the team's tracked time.</p>
+    {% if heat %}
+      <div class="heat-grid">
+        <div><p class="cap">White<small>attacks right, {{ heat.n.white }} tracked player-steps</small></p><div class="stage"><div id="heat-white" style="height:330px"></div></div></div>
+        <div><p class="cap">Lime<small>attacks left, {{ heat.n.lime }} tracked player-steps</small></p><div class="stage"><div id="heat-lime" style="height:330px"></div></div></div>
+      </div>
+      <p class="note">Each cell is 5 m x 5 m and shows the share of that team's tracked player-steps spent there. Both maps use the same colour scale. A player is counted only while he is tracked, and 30 seconds is a short sample.</p>
+      {{ heat|json_script:"heat-data" }}
+    {% else %}
+      <p class="note">{{ tracks_msg }}</p>
+    {% endif %}
+  </section>
+
+  <section class="panel" id="load">
+    <h2>Player load</h2>
+    <p class="intro">How far and how fast each player ran. Bars are coloured by team. Terms such as HSR are explained in the <a href="#key">key</a>.</p>
+    {% if players %}
+      <div class="stage">
+        <div id="bar-dist" style="width:100%"></div>
+        <div id="bar-hsr" style="width:100%"></div>
+        <div id="bar-top" style="width:100%"></div>
+      </div>
+      <p class="note">Distance and high-speed running are lower bounds: a player is only counted while he is tracked, and a 30-second clip is a short sample. Top speed is shown solid only for players tracked cleanly for at least 10 s; faded bars are indicative only.</p>
+      {{ players|json_script:"players-data" }}
+    {% else %}
+      <p class="note">{{ players_msg }}</p>
+    {% endif %}
+  </section>
+
+  <section class="panel" id="players">
+    <h2>Player table</h2>
+    <p class="intro">One row per tracked player: movement, ball control and involvement in passes and duels. See the <a href="#key">key</a> for what each column means.</p>
+    {% if player_table %}
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>Player</th><th>Team</th><th>Distance (m)</th><th>High-speed (m)</th><th>Sprint (m)</th>
+        <th>Top speed (km/h)</th><th>Clean tracking (s)</th><th>Ball control (s)</th>
+        <th>Passes made</th><th>Passes received</th><th>Duels</th><th>Turnovers</th>
+      </tr></thead>
+      <tbody>
+      {% for p in player_table %}
+      <tr>
+        <td><strong>{{ p.chain }}</strong></td><td><span class="chip {{ p.team }}">{{ p.team }}</span></td><td>{{ p.dist }}</td><td>{{ p.hsr }}</td><td>{{ p.sprint }}</td>
+        <td{% if not p.top_ok %} style="opacity:.5" title="Tracked cleanly for under 10 s: indicative only"{% endif %}>{{ p.top }}{% if not p.top_ok %} *{% endif %}</td>
+        <td>{{ p.clean }}</td><td>{{ p.control }}</td>
+        <td>{{ p.made }}</td><td>{{ p.recv }}</td><td>{{ p.duel }}</td><td>{{ p.lost }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="note">Distance and speeds are lower bounds: a player is counted only while tracked. * Top speed from under 10 s of clean tracking is indicative only. Ball control is the time a player was the nearest to a slow ball while his team had it. Pass, duel and turnover counts are event candidates from a 30-second clip, so they are small and are pointers to check on video. A tracking ID can be a fragment of one player, so a player may appear under more than one ID.</p>
+    {% else %}
+      <p class="note">The player table needs player_stats_final_v9.csv with chain and dist_m columns.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel" id="timeline">
+    <h2>Events timeline</h2>
+    <p class="intro">Passes, contested balls, turnovers and carries along the clip, in the lane of the team that had the ball.</p>
+    <div class="stage"><div id="timeline-chart" style="width:100%;height:300px"></div></div>
+    <p class="note">Each marker is an event candidate found from the ball and player positions; faded markers have lower confidence. Hover for who and where. Counts are small, so treat these as pointers to check on video.</p>
+    {{ event_points|json_script:"events-data" }}
+  </section>
+
+  <section class="panel" id="notes">
+    <h2>Coach notes</h2>
+    <p class="intro">Written from the numbers above. Each suggestion says how sure we are and what to check on video.</p>
+    <div class="notes">{{ notes_html|safe }}</div>
+  </section>
+
+  <section class="panel" id="key">
+    <h2>Key to the terms</h2>
+    <p class="intro">What the words and columns on this page mean.</p>
+    <dl class="key">
+      <div><dt>HSR (high-speed running)</dt><dd>Distance a player covered while moving faster than the high-speed threshold. It shows how much hard running a player did, not just how far he travelled.</dd></div>
+      <div><dt>Sprint (m)</dt><dd>The part of the running that was at sprint speed, faster than high-speed running.</dd></div>
+      <div><dt>Distance (m)</dt><dd>Total ground covered while the player was tracked.</dd></div>
+      <div><dt>Top speed (km/h)</dt><dd>The fastest smoothed speed. It is trusted only when the player was tracked cleanly for at least 10 s; otherwise it is faded and marked with *.</dd></div>
+      <div><dt>Clean tracking (s)</dt><dd>Seconds of unbroken tracking, with no gaps filled in. The longer it is, the more a player's speed numbers can be trusted.</dd></div>
+      <div><dt>Lower bound</dt><dd>A number that can only be too small, never too big. A player is counted only while he is tracked, so real distances are at least this much.</dd></div>
+      <div><dt>Tracking ID</dt><dd>The label for one continuously tracked player (such as W05 or L06). If tracking broke, one player can appear under two IDs.</dd></div>
+      <div><dt>Ball control (s)</dt><dd>Time a player was the nearest to a slow-moving ball while his team had it. Goalkeepers count.</dd></div>
+      <div><dt>Pass candidate</dt><dd>The ball moved from one player's control to a teammate's. It is a candidate, not a confirmed pass, because the video is analysed automatically.</dd></div>
+      <div><dt>Contested ball (duel)</dt><dd>Players from both teams were close to the ball at the same time, so neither side clearly had it.</dd></div>
+      <div><dt>Turnover</dt><dd>The ball ran loose and then the other team gained control of it.</dd></div>
+      <div><dt>Carry</dt><dd>The same player kept or regained control and moved on with the ball.</dd></div>
+      <div><dt>Confidence: high, medium, low</dt><dd>How sure the pipeline is about an event. High means both players held the ball for a clear spell; low means the evidence was thin, so check it on video.</dd></div>
+      <div><dt>Tracked player-step</dt><dd>One player at one moment of the clip. One step is 0.12 s, so the 30-second clip has 250 steps. Heat maps count these.</dd></div>
+      <div><dt>Heat map</dt><dd>The pitch cut into 5 m squares. Brighter squares are where a team spent more of its tracked time.</dd></div>
+      <div><dt>Position accuracy</dt><dd>About 1 m: how close a dot on the pitch is to where the player really stood.</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel" id="data">
+    <h2>The numbers behind it</h2>
+    <p class="intro">Team totals, every event and the full player statistics, exactly as the pipeline saved them.</p>
+
+    <h3 style="margin:22px 0 8px">Team totals (lower bounds)</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Metric</th>{% for t in teams %}<th>{{ t }}</th>{% endfor %}</tr></thead>
+      <tbody>{% for r in team_rows %}<tr><td>{{ r.metric }}</td>{% for v in r.values %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+    </table></div>
+
+    <h3 style="margin:26px 0 8px">Events</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Time (s)</th><th>Event</th><th>Team</th><th>From</th><th>To</th><th>Ball (m)</th><th>Progress (m)</th><th>Confidence</th></tr></thead>
+      <tbody>{% for e in events %}<tr><td>{{ e.t_s }}</td><td>{{ e.event }}</td><td>{{ e.team_from }}</td><td>{{ e.from }}</td><td>{{ e.to }}</td><td>{{ e.ball_m }}</td><td>{{ e.progress_m }}</td><td><span class="conf {{ e.confidence }}">{{ e.confidence }}</span></td></tr>{% endfor %}</tbody>
+    </table></div>
+
+    <h3 style="margin:26px 0 8px">Player statistics</h3>
+    <div class="scroll"><table>
+      <thead><tr>{% for c in stat_cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>{% for row in stat_rows %}<tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Demo analysis of a 30-second clip. Distances and speeds are lower bounds and positions are accurate to roughly 1 m.</p>
+</footer>
+
+<script>
+// Highlight the nav link of the section currently in view.
+(function () {
+  var links = {};
+  document.querySelectorAll(".nav a").forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+  if (!("IntersectionObserver" in window)) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting && links[e.target.id]) {
+        Object.values(links).forEach(function (a) { a.classList.remove("on"); });
+        links[e.target.id].classList.add("on");
+      }
+    });
+  }, {rootMargin: "-30% 0px -60% 0px"});
+  document.querySelectorAll("main .panel").forEach(function (s) { io.observe(s); });
+})();
+</script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+{% if tracks %}
+<script>
+// Animated pitch: one frame per step (0.12 s). Data comes from the view via json_script.
+const T = JSON.parse(document.getElementById("tracks-data").textContent);
+const L = 105, W = 68;                                    // pitch size in metres
+
+// --- pitch lines (white) drawn as Plotly shapes, coordinates in metres ---
+const line = {color: "rgba(255,255,255,0.9)", width: 1.5};
+const rect = (x0, y0, x1, y1) => ({type: "rect", x0, y0, x1, y1, line});
+const shapes = [
+  rect(0, 0, L, W),                                       // outline
+  {type: "line", x0: L/2, y0: 0, x1: L/2, y1: W, line},   // halfway line
+  {type: "circle", x0: L/2-9.15, y0: W/2-9.15, x1: L/2+9.15, y1: W/2+9.15, line},   // centre circle
+  rect(0, W/2-20.16, 16.5, W/2+20.16), rect(L-16.5, W/2-20.16, L, W/2+20.16),       // penalty areas
+  rect(0, W/2-9.16, 5.5, W/2+9.16),   rect(L-5.5, W/2-9.16, L, W/2+9.16),           // six-yard boxes
+  rect(-2, W/2-3.66, 0, W/2+3.66),    rect(L, W/2-3.66, L+2, W/2+3.66),             // goals
+];
+
+// --- one marker trace per team; frames only replace x, y and labels ---
+const style = {
+  white: {name: "White", color: "#ffffff", edge: "#1b2430"},
+  lime:  {name: "Lime",  color: "#b6f23a", edge: "#1b2430"},
+};
+const trace = (team, f) => ({
+  type: "scatter", mode: "markers+text", name: style[team].name,
+  x: f[team].x, y: f[team].y, text: f[team].c, textposition: "top center",
+  textfont: {size: 10, color: "#ffffff"},
+  marker: {size: 13, color: style[team].color, line: {color: style[team].edge, width: 1.5}},
+  hovertemplate: "%{text}<br>x %{x:.1f} m, y %{y:.1f} m<extra></extra>",
+});
+const frames = T.map((f, i) => ({name: String(i), data: [trace("white", f), trace("lime", f)]}));
+
+const layout = {
+  shapes, margin: {l: 10, r: 10, t: 10, b: 70},
+  paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "#2e7d4f",
+  xaxis: {range: [-3, L+3], visible: false, fixedrange: true},
+  yaxis: {range: [W+3, -3], visible: false, fixedrange: true, scaleanchor: "x"},   // reversed: far touchline on top
+  legend: {orientation: "h", y: 1.0, x: 0.5, xanchor: "center", font: {color: "#44564b"}},
+  updatemenus: [{type: "buttons", direction: "left", x: 0.0, y: -0.02, xanchor: "left", yanchor: "top", pad: {t: 6, r: 8, l: 8, b: 6},
+    bgcolor: "#ffd23f", bordercolor: "#0c1f17", borderwidth: 2, font: {color: "#0c1f17", size: 14}, showactive: false,   // yellow, dark text
+    buttons: [
+      {label: "Play",  method: "animate", args: [null, {frame: {duration: 120, redraw: false}, transition: {duration: 0}, fromcurrent: true}]},
+      {label: "Pause", method: "animate", args: [[null], {mode: "immediate", frame: {duration: 0, redraw: false}, transition: {duration: 0}}]},
+    ]}],
+  sliders: [{x: 0.22, y: -0.02, len: 0.78, xanchor: "left", yanchor: "top", pad: {t: 6},
+    ticklen: 0, minorticklen: 0, font: {size: 1, color: "rgba(0,0,0,0)"},          // hide the 250 tick labels; the current time is still shown
+    currentvalue: {prefix: "Time: ", suffix: " s", font: {size: 12, color: "#44564b"}},
+    steps: T.map((f, i) => ({label: f.t.toFixed(1), method: "animate",
+      args: [[String(i)], {mode: "immediate", frame: {duration: 0, redraw: false}, transition: {duration: 0}}]}))}],
+};
+Plotly.newPlot("pitch", [trace("white", T[0]), trace("lime", T[0])], layout, {responsive: true, displayModeBar: false})
+  .then(() => Plotly.addFrames("pitch", frames));
+</script>
+{% endif %}
+{% if heat %}
+<script>
+// Heat maps: one Plotly heatmap per team, drawn in pitch metres with the pitch lines on top.
+const H = JSON.parse(document.getElementById("heat-data").textContent);
+const hl = {color: "rgba(255,255,255,0.9)", width: 1.2};
+const hr = (x0, y0, x1, y1) => ({type: "rect", x0, y0, x1, y1, line: hl});
+const hshapes = [
+  hr(0, 0, 105, 68), {type: "line", x0: 52.5, y0: 0, x1: 52.5, y1: 68, line: hl},
+  {type: "circle", x0: 52.5-9.15, y0: 34-9.15, x1: 52.5+9.15, y1: 34+9.15, line: hl},
+  hr(0, 34-20.16, 16.5, 34+20.16), hr(105-16.5, 34-20.16, 105, 34+20.16),
+  hr(0, 34-9.16, 5.5, 34+9.16),   hr(105-5.5, 34-9.16, 105, 34+9.16),
+];
+["white", "lime"].forEach(team => {
+  Plotly.newPlot("heat-" + team, [{
+    type: "heatmap", x: H.x, y: H.y, z: H.z[team], zmin: 0, zmax: H.zmax, xgap: 1, ygap: 1,
+    colorscale: [[0, "#2e7d4f"], [0.5, "#f4d35e"], [1, "#d1495b"]],            // pitch green -> yellow -> red
+    colorbar: {title: {text: "% of steps", side: "right", font: {color: "#44564b"}}, thickness: 12, len: 0.9, tickfont: {color: "#44564b"}},
+    hovertemplate: "x %{x:.0f} m, y %{y:.0f} m<br>%{z:.1f}% of tracked steps<extra></extra>",
+  }], {
+    shapes: hshapes, margin: {l: 6, r: 6, t: 6, b: 6},
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "#2e7d4f",
+    xaxis: {range: [-1, 106], visible: false, fixedrange: true},
+    yaxis: {range: [69, -1], visible: false, fixedrange: true, scaleanchor: "x"},   // far touchline on top, as in the video
+  }, {responsive: true, displayModeBar: false});
+});
+</script>
+{% endif %}
+{% if players %}
+<script>
+// Player bar charts: one horizontal bar per player, sorted, coloured by team.
+const P = JSON.parse(document.getElementById("players-data").textContent);
+const teamColor = {white: "#ffffff", lime: "#b6f23a", other: "#9aa6b5"};
+function bars(id, key, title, unit, fadeUnlessOk) {
+  const rows = P.filter(p => p[key] !== null).sort((a, b) => a[key] - b[key]);   // ascending so the biggest ends up on top
+  Plotly.newPlot(id, [{
+    type: "bar", orientation: "h",
+    x: rows.map(p => p[key]), y: rows.map(p => p.chain),
+    marker: {color: rows.map(p => teamColor[p.team]), line: {color: "#1b2430", width: 1},
+             opacity: rows.map(p => (fadeUnlessOk && !p.top_ok) ? 0.3 : 1)},
+    text: rows.map(p => p[key].toFixed(1)), textposition: "outside", cliponaxis: false,
+    textfont: {color: "#44564b", size: 11},
+    hovertemplate: "%{y}: %{x:.1f} " + unit + "<extra></extra>",
+  }], {
+    title: {text: title, font: {size: 14, color: "#44564b"}, x: 0.01},
+    height: 60 + 24 * rows.length, margin: {l: 70, r: 40, t: 40, b: 30},
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    xaxis: {title: {text: unit, font: {color: "#44564b"}}, tickfont: {color: "#44564b"}, gridcolor: "rgba(128,128,128,0.2)", fixedrange: true},
+    yaxis: {type: "category", tickfont: {color: "#44564b"}, fixedrange: true},
+  }, {responsive: true, displayModeBar: false});
+}
+bars("bar-dist", "dist", "Distance covered (lower bound)", "m", false);
+bars("bar-hsr", "hsr", "High-speed running (lower bound)", "m", false);
+bars("bar-top", "top", "Top speed (solid = tracked cleanly for 10 s or more)", "km/h", true);
+</script>
+{% endif %}
+<script>
+// Events timeline: x = time, lane = team that had the ball, symbol/colour = event type, opacity = confidence.
+const E = JSON.parse(document.getElementById("events-data").textContent);
+const kinds = {
+  pass:      {label: "Pass candidate", symbol: "triangle-right", color: "#4cc38a"},
+  contested: {label: "Contested ball", symbol: "x",              color: "#f4a261"},
+  turnover:  {label: "Turnover",       symbol: "diamond",        color: "#d1495b"},
+  carry:     {label: "Carry",          symbol: "circle",         color: "#6c9bd2"},
+  other:     {label: "Other",          symbol: "square",         color: "#9aa6b5"},
+};
+const confOpacity = {high: 1, medium: 0.65, low: 0.35};
+const tl = Object.keys(kinds).map(k => {
+  const pts = E.filter(e => e.kind === k);
+  return {
+    type: "scatter", mode: "markers", name: kinds[k].label, visible: pts.length ? true : "legendonly",
+    x: pts.map(e => e.t), y: pts.map(e => e.team),
+    marker: {symbol: kinds[k].symbol, size: 14, color: kinds[k].color, opacity: pts.map(e => confOpacity[e.conf] || 0.5),
+             line: {color: "#1b2430", width: 1}},
+    text: pts.map(e => e.name + ": " + e.from + " to " + e.to + (e.ball != null ? ", ball " + e.ball.toFixed(1) + " m" : "") + " (" + e.conf + " confidence)"),
+    hovertemplate: "%{x:.1f} s<br>%{text}<extra></extra>",
+  };
+}).filter(t => t.x.length);
+Plotly.newPlot("timeline-chart", tl, {
+  margin: {l: 60, r: 20, t: 10, b: 70},
+  paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+  xaxis: {range: [0, 30], title: {text: "Time (s)", font: {color: "#44564b"}}, tickfont: {color: "#44564b"}, gridcolor: "rgba(128,128,128,0.2)", fixedrange: true},
+  yaxis: {type: "category", categoryorder: "array", categoryarray: ["lime", "white"], tickfont: {color: "#44564b"}, gridcolor: "rgba(128,128,128,0.2)", fixedrange: true},
+  legend: {orientation: "h", y: -0.35, font: {color: "#44564b"}},
+}, {responsive: true, displayModeBar: false});
+</script>
+</body>
+</html>

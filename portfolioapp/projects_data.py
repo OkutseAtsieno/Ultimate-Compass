@@ -66,35 +66,43 @@ PROJECTS = {
     "cv": [
         {
             "title": "AI Football Coach",
-            "tagline": "Live match analysis built for Kenyan football",
-            "status": "In development",
+            "tagline": "Match video turned into coach-ready insight",
+            "status": "Working demo",
             "summary": (
-                "A computer-vision system that watches match and training video, "
-                "tracks every player and the ball, and turns the movement into "
-                "coach-ready insight: distance covered, positioning, team shape "
-                "and development trends. The goal is an affordable tool for "
-                "academies and clubs that cannot pay for international analysis "
-                "platforms, working on ordinary phone footage."
+                "A computer-vision pipeline that watches match video, tracks "
+                "every player and the ball, converts positions to real pitch "
+                "metres, and turns the movement into coach-ready insight: "
+                "distance and high-speed running, team shape, heat maps, "
+                "passes, duels and turnovers, and written coach notes whose "
+                "every number is checked against the data. The goal is an "
+                "affordable tool for academies and clubs that cannot pay for "
+                "international analysis platforms, working on ordinary "
+                "footage. The demo analyses a 30-second clip; positions are "
+                "accurate to roughly 1 m."
             ),
             "tags": [
                 "YOLOv8x", "ByteTrack", "OpenCV", "Python",
-                "Power BI", "Django / FastAPI", "LLM coaching",
+                "Django", "Plotly", "Sports Analytics",
             ],
-            "highlights": [
-                "Player and ball detection with YOLOv8x",
-                "Multi-object tracking with persistent player IDs (ByteTrack)",
-                "Planned: pitch calibration to convert pixels to real metres",
-                "Planned: an AI coach that explains the numbers in plain English and Swahili",
+            "highlights": [],
+            "metrics": [
+                {"label": "Position accuracy", "value": "~1 m"},
+                {"label": "Demo clip analysed", "value": "30 s"},
             ],
             # Progress shown as a pipeline. state: done | progress | planned
             "pipeline": [
                 {"step": "Player and ball detection (YOLOv8x)", "state": "done"},
                 {"step": "Multi-object tracking (ByteTrack)", "state": "done"},
-                {"step": "Team assignment from kit colour", "state": "progress"},
-                {"step": "Pitch calibration (pixels to metres)", "state": "planned"},
-                {"step": "Metrics: distance, speed, heatmaps, team shape", "state": "planned"},
-                {"step": "AI coach reports (English / Swahili)", "state": "planned"},
-                {"step": "Power BI dashboards and match reports", "state": "planned"},
+                {"step": "Team assignment from kit colour", "state": "done"},
+                {"step": "Pitch calibration (pixels to metres)", "state": "done"},
+                {"step": "Metrics: distance, speed, heat maps, team shape", "state": "done"},
+                {"step": "Passes, duels and turnovers from ball possession", "state": "done"},
+                {"step": "Coach notes with every number checked against the data", "state": "done"},
+                {"step": "Interactive web dashboard (live demo)", "state": "done"},
+                {"step": "Detector fine-tuned on local match footage", "state": "planned"},
+                {"step": "Power BI report", "state": "planned"},
+                {"step": "Full-match processing and video upload", "state": "planned"},
+                {"step": "Swahili coach notes", "state": "planned"},
             ],
             # Drop your clip in portfolioapp/static/videos/ with this name,
             # or change the name here.
@@ -102,7 +110,7 @@ PROJECTS = {
             "poster": "thumbs/football.jpg",
             "youtube_id": "",
             "images": [],
-            "links": [],  # e.g. [{"label": "GitHub", "url": "https://github.com/..."}]
+            "links": [{"label": "Open the live demo", "url": "/football/"}],
         },
         {
             "title": "Maize Leaf Disease Detection",

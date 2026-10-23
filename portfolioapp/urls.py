@@ -13,4 +13,7 @@ urlpatterns = [
     path('deeplearning/', RedirectView.as_view(url='/projects/#cv')),
     path('machinelearning/', RedirectView.as_view(url='/projects/#predictive')),
     path('webprojects/', RedirectView.as_view(url='/projects/#dashboards')),
+
+
+   
 ]

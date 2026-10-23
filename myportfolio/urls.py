@@ -19,5 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('football/', include('football_dashboard.urls')),   # must come before the catch-all '' line
     path('', include('portfolioapp.urls')),
 ]
