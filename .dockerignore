@@ -1,0 +1,25 @@
+.git/
+.gitignore
+.DS_Store
+__pycache__/
+*.py[cod]
+*.log
+
+# Local DB and media are mounted via a volume, never baked into the image
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# Secrets
+.env
+*.env
+!.env.example
+myportfolio/mydata.env
+
+# Dev tooling
+venv/
+.venv/
+.vscode/
+.idea/
+*.md

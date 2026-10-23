@@ -1,0 +1,28 @@
+services:
+  ultimate-compass:
+    build: .
+    image: ultimate-compass:latest
+    container_name: ultimate-compass
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # SQLite + any user-uploaded files survive container rebuilds.
+      - ultimate-compass-data:/app/data
+      - ultimate-compass-db:/app/dbstore
+    # Keep SQLite file inside the named volume (dbstore), not in the image.
+    environment:
+      - DJANGO_DB_PATH=/app/dbstore/db.sqlite3
+    expose:
+      - "8000"
+    networks:
+      - web
+
+volumes:
+  ultimate-compass-data:
+  ultimate-compass-db:
+
+networks:
+  web:
+    external: true
+    name: web
