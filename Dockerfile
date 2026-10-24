@@ -20,7 +20,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 RUN chmod +x /app/entrypoint.sh \
- && mkdir -p /app/staticfiles /app/data \
+ && mkdir -p /app/staticfiles /app/data /app/dbstore \
  && adduser --disabled-password --no-create-home --gecos "" app \
  && chown -R app:app /app
 

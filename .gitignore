@@ -18,6 +18,9 @@ venv/
 env/
 ENV/
 
+# Local docker-compose overrides (port maps for local dev)
+docker-compose.override.yml
+
 # Editors / OS
 .vscode/
 .idea/
